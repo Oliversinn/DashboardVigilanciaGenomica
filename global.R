@@ -104,7 +104,6 @@ variants = read_csv('data/pangoVariants.csv', guess_max = 5000)
 
 
 ### DATOS DEL LNS
-lns2022 = read_csv2('data/BASE SEQ 2022.csv', guess_max = 5000) %>% dplyr::filter( !is.na(`RESULTADO FINAL`))
 lns2022 = read.xlsx('data/BASE SEQ 2022.xlsx', sheet = 2, sep.names = ' ') %>% dplyr::filter( !is.na(`RESULTADO FINAL`))
 
 lns20y21 = read_csv('data/lns20y21.csv', guess_max = 5000) 
