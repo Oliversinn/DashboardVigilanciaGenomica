@@ -40,8 +40,10 @@ shinyServer(function(input, output, session) {
           dplyr::filter(
                         #if(input$DASFilter != 'TODOS')  (departamento %like% input$DASFilter) else TRUE,
                         if(!'TODOS' %in% input$DASFilter)  (`ÁREA DE SALUD` %in% input$DASFilter) else TRUE,
-                        if(input$DMSFilter != 'TODOS')  (`DISTRITO/HOSPITAL` %like% input$DMSFilter) else TRUE,
-                        if(input$VarianteFilter != 'TODOS')  (Variante %like% input$VarianteFilter) else TRUE,
+                        #if(input$DMSFilter != 'TODOS')  (`DISTRITO/HOSPITAL` %like% input$DMSFilter) else TRUE,
+                        if(!'TODOS' %in% input$DMSFilter)  (`DISTRITO/HOSPITAL` %in% input$DMSFilter) else TRUE,
+                        #if(input$VarianteFilter != 'TODOS')  (Variante %like% input$VarianteFilter) else TRUE,
+                        if(!'TODOS' %in% input$VarianteFilter)  (Variante %in% input$VarianteFilter) else TRUE,
                         #if(input$originatingLabFilter != 'TODOS')  (originating_lab %like% input$originatingLabFilter) else TRUE,
                         #if(input$submittingLabFilter != 'TODOS')  (submitting_lab %like% input$submittingLabFilter) else TRUE,
                         `FECHA INGRESO DE MUESTRA` >= format(input$fechaReporte[1]),
