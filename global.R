@@ -163,7 +163,6 @@ lns = lns %>%
                          `RESULTADO FINAL` %like% 'BA' ~ 'BA',
                          `RESULTADO FINAL` %like% 'B.1.351' ~ 'B.1.351',
                          `RESULTADO FINAL` %like% 'P.1' ~ 'P.1',
-                         `RESULTADO FINAL` %like% 'Q' ~ 'Q',
                          T ~ `RESULTADO FINAL`),
     grupo_etario = case_when(AÑOS < 10 ~ "0-9 años",
                              AÑOS >= 10 & AÑOS < 20 ~ "10-19 años",
@@ -195,7 +194,7 @@ lns = dplyr::left_join(lns, variants)  %>%
     ), 
     T ~ Variante),
     Variante = factor(Variante,
-                      levels=c('Omicron', 'Delta', 'Gamma', 'Beta', 'Alpha', 'Iota', 'Epsilon', 'Eta', 'Mu', 'Otro', 'Desconocido')),
+                      levels=c('Omicron', 'Delta', 'Gamma', 'Beta', 'Alpha', 'Iota', 'Epsilon', 'Eta', 'Mu', 'Recombinante', 'Otro', 'Desconocido')),
     pangoVoc = paste(`RESULTADO FINAL`, Variante),
     SEXO = case_when(
       is.na(SEXO) ~ 'DESCONOCIDO',
@@ -218,6 +217,7 @@ colorVariants = c("Alpha" = "#FEE08B",
                   "Delta" = "#D53E4F", 
                   "Omicron" = "#9E0142",
                   "Otro" = "#176BA0",
+                  "Recombinante" = "#d1fbff",
                   "Desconocido" = "#142459")
 
 
