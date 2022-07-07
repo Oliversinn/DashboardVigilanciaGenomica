@@ -24,8 +24,8 @@ library(plotly)
 library(dplyr)
 
 
-## Carga de datos
-### Datos para mapas de departamentos
+# Carga de datos ----
+## Datos para mapas de departamentos ----
 departamentos_shapes = st_read("data/departamentos_gtm")
 departamentos_shapes = st_transform(departamentos_shapes, "+proj=longlat +datum=WGS84") %>%
   rename(departamento = nombre)
@@ -47,10 +47,7 @@ departamentos = departamentosGeo %>%
   select(departamento) %>%
   unique()
 
-### Datos para mapas de DAS
-
-
-
+## Datos para mapas de DAS ----
 areas_shapes = st_read('data/DAS_shapes')
 areas_shapes = st_transform(areas_shapes, "+proj=longlat +datum=WGS84")
 areas_shapes = areas_shapes %>%
@@ -96,16 +93,15 @@ areas = areasGeo %>%
   select(`ÁREA DE SALUD`) %>%
   unique()
 
-### Variantes y VOC
+## Variantes y VOC ----
 variants = read_csv('data/pangoVariants.csv', guess_max = 5000)
 
 
 #tree <- ape::read.tree("gisaid.mafft.fasta.parstree")
 
 
-### DATOS DEL LNS
-lns2022 = read.xlsx('data/BASE SEQ 2022.xlsx', sheet = 2, sep.names = ' ') %>% dplyr::filter( !is.na(`RESULTADO FINAL`))
-
+## DATOS DEL LNS ----
+### 2020 y 2021 ----
 lns20y21 = read_csv('data/lns20y21.csv', guess_max = 5000) 
 lns20y21 = lns20y21 %>%
   mutate(
@@ -114,6 +110,8 @@ lns20y21 = lns20y21 %>%
     `FECHA INGRESO DE MUESTRA` = as.Date(`FECHA INGRESO DE MUESTRA`, '%Y-%m-%d')
   )
 
+### 2022 ----
+lns2022 = read.xlsx('data/BASE SEQ 2022.xlsx', sheet = 2, sep.names = ' ') %>% dplyr::filter( !is.na(`RESULTADO FINAL`))
 lns2022 = lns2022 %>%
   filter(
     !is.na(`RESULTADO FINAL`),
@@ -139,8 +137,10 @@ lns2022 = lns2022 %>%
     `FECHA INGRESO DE MUESTRA` = as.Date(as.numeric(`FECHA INGRESO DE MUESTRA`), origin = "1899-12-30")
   )
 
+### Union de base de datos ----
 lns = rbind(lns20y21, lns2022)
 
+### Transformaciones y filtros ----
 lns = lns %>%
   filter(
     !is.na(`RESULTADO FINAL`),
@@ -204,7 +204,7 @@ lns = dplyr::left_join(lns, variants)  %>%
 
 
 
-## Colores para las gráficas
+# Colores para las gráficas ----
 colorVariants = c("Alpha" = "#FEE08B", 
                   "Beta" = "#FDAE61", 
                   "Gamma" = "#F46D43", 

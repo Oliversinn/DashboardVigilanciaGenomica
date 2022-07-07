@@ -34,7 +34,7 @@ shinyServer(function(input, output, session) {
             #)
     #})
     
-    ## LNS REACTIVE
+    ## LNS REACTIVE ----
     lns_reactive = reactive({
         data = lns %>%
           dplyr::filter(
@@ -46,12 +46,12 @@ shinyServer(function(input, output, session) {
                         if(!'TODOS' %in% input$VarianteFilter)  (Variante %in% input$VarianteFilter) else TRUE,
                         #if(input$originatingLabFilter != 'TODOS')  (originating_lab %like% input$originatingLabFilter) else TRUE,
                         #if(input$submittingLabFilter != 'TODOS')  (submitting_lab %like% input$submittingLabFilter) else TRUE,
-                        `FECHA INGRESO DE MUESTRA` >= format(input$fechaReporte[1]),
-                        `FECHA INGRESO DE MUESTRA` <= format(input$fechaReporte[2])
+                        `FECHA DE TOMA DE MUESTRA` >= format(input$fechaReporte[1]),
+                        `FECHA DE TOMA DE MUESTRA` <= format(input$fechaReporte[2])
                         )
     })
     
-    ## Filtros
+    ### Filtros ----
     dases = reactive({
         lns %>%
             select(`ÁREA DE SALUD`) %>%
@@ -104,7 +104,7 @@ shinyServer(function(input, output, session) {
                           selected = input$VarianteFilter
         )})
     
-    ## Epicurva lns
+    ## Epicurva lns Toma ----
     
     fechas_reactiveLNSToma = reactive({
       lnsIncidence = incidence(
@@ -121,38 +121,49 @@ shinyServer(function(input, output, session) {
           date_index,
           Variante
         ) %>%
-        summarise(n = sum(count))
+        summarise(n = sum(count)) %>%
+        rename(
+          `Semana epidemiológica` = date_index
+        )
     })
     
-    fechasLNS = lns %>%
-      group_by(`FECHA INGRESO DE MUESTRA`, Variante) %>%
-      tally() 
+
     
-    weekly_breaks_allLNS <- reactive({ 
-      seq.Date(
-        from = floor_date(min(input$fechaReporte[1], na.rm=T),   "week", week_start = 1), # monday before first case
+    weekly_breaks_tomaLNS <- reactive({ 
+      breaks = seq.Date(
+        from = floor_date(min(fechas_reactiveLNSToma()$`Semana epidemiológica`-7, na.rm=T),   "week", week_start = 1), # monday before first case
         to   = ceiling_date(max(input$fechaReporte[2], na.rm=T), "week", week_start = 1), # monday after last case
-        by   = "month")
+        by   = "week")
+      
+      monthly = c(breaks[1])
+      
+      for (i in c(1:length(breaks))) {
+        if (i %% 5 == 0) {
+          monthly = c(monthly, breaks[i])
+        }
+      }
+      monthly
     })
     
     output$variantesPorSemanaEpidemiologicaLNSToma = renderPlotly({
-      p = ggplot(fechas_reactiveLNSToma(), aes(x=date_index, y=n, fill=Variante)) +
+      p = ggplot(fechas_reactiveLNSToma(), aes(x=`Semana epidemiológica`, y=n, fill=Variante)) +
         geom_bar(stat="identity", color = 'black') +
         scale_fill_manual(values = colorVariants) +
         labs(x="Semana epidemiológica", y="No. de muestras")+ 
         theme(axis.text.x = element_text(angle = 90))+
-        scale_x_date(breaks = weekly_breaks_allLNS(), date_labels = "%d/%m/%Y",expand = c(0,0), 
+        scale_x_date(breaks = weekly_breaks_tomaLNS(), 
+                     date_labels = "%d/%m/%Y",expand = c(0,0), 
                      limits = c(input$fechaReporte[1]-1, max(input$fechaReporte[2])+7)) +
           ylim(0, max(fechas_reactiveLNSToma()$n)+25) 
       
       p2 = ggplotly(p, height = 500) %>%
         layout(#legend = list(orientation = "h",  y = -0.3),
-          title = list(text = paste0('Variantes de preocupación e interes de SARS-CoV-2',
+          title = list(text = paste0('VOC y VOI de SARS-CoV-2 detectadas en Guatemala',
                                      '<br>',
-                                     'en Guatemala por fecha de toma de muestra',
+                                     'por Semana Epidemiológica',
                                      '<br>',
                                      '<sup>',
-                                     '(N= ',
+                                     '(n = ',
                                      nrow(lns_reactive()),
                                      ')',
                                      '</sup>'), y = 0.95)) #%>% layout(height = 500)
@@ -180,7 +191,7 @@ shinyServer(function(input, output, session) {
     )
     
     
-    ## Epicurva lns2
+    ## Epicurva lns Ingreso ----
     
     fechas_reactiveLNSIngreso = reactive({
       lnsIncidence = incidence(
@@ -197,38 +208,47 @@ shinyServer(function(input, output, session) {
           date_index,
           Variante
         ) %>%
-        summarise(n = sum(count))
+        summarise(n = sum(count)) %>%
+        rename(
+          `Semana epidemiológica` = date_index
+        )
     })
     
-    fechasLNS = lns %>%
-      group_by(`FECHA INGRESO DE MUESTRA`, Variante) %>%
-      tally() 
-    
-    weekly_breaks_allLNS <- reactive({ 
-      seq.Date(
-      from = floor_date(min(input$fechaReporte[1], na.rm=T),   "week", week_start = 1), # monday before first case
-      to   = ceiling_date(max(input$fechaReporte[2], na.rm=T), "week", week_start = 1), # monday after last case
-      by   = "month")
+
+    weekly_breaks_ingresoLNS <- reactive({ 
+      breaks = seq.Date(
+        from = floor_date(min(fechas_reactiveLNSIngreso()$`Semana epidemiológica`-7, na.rm=T),   "week", week_start = 1), # monday before first case
+        to   = ceiling_date(max(input$fechaReporte[2], na.rm=T), "week", week_start = 1), # monday after last case
+        by   = "week")
+      
+      monthly = c(breaks[1])
+      
+      for (i in c(1:length(breaks))) {
+        if (i %% 5 == 0) {
+          monthly = c(monthly, breaks[i])
+        }
+      }
+      monthly
     })
     
     output$variantesPorSemanaEpidemiologicaLNS = renderPlotly({
-      p = ggplot(fechas_reactiveLNSIngreso(), aes(x=date_index, y=n, fill=Variante)) +
+      p = ggplot(fechas_reactiveLNSIngreso(), aes(x=`Semana epidemiológica`, y=n, fill=Variante)) +
         geom_bar(stat="identity", color = 'black') +
         scale_fill_manual(values = colorVariants) +
         labs(x="Semana epidemiológica", y="No. de muestras")+ 
         theme(axis.text.x = element_text(angle = 90))+
-        scale_x_date(breaks = weekly_breaks_allLNS(), date_labels = "%d/%m/%Y",expand = c(0,0), 
+        scale_x_date(breaks = weekly_breaks_ingresoLNS(), date_labels = "%d/%m/%Y",expand = c(0,0), 
                      limits = c(input$fechaReporte[1]-1, max(input$fechaReporte[2])+7)) +
           ylim(0, max(fechas_reactiveLNSIngreso()$n)+25) 
       
       p2 = ggplotly(p, height = 500) %>%
       layout(#legend = list(orientation = "h",  y = -0.3),
-               title = list(text = paste0('Variantes de preocupación e interes de SARS-CoV-2',
+               title = list(text = paste0('VOC y VOI de SARS-CoV-2 detectadas en Guatemala',
                                           '<br>',
-                                          'en Guatemala por fecha de ingreso de muestra',
+                                          'por Semana Epidemiológica',
                                           '<br>',
                                           '<sup>',
-                                          '(N= ',
+                                          '(n = ',
                                           nrow(lns_reactive()),
                                           ')',
                                           '</sup>'), y = 0.95)) #%>% layout(height = 500)
@@ -255,17 +275,79 @@ shinyServer(function(input, output, session) {
       )
     )
     
+    ## Gráfico de distribución proporcional ----
+    lnsStacked = reactive({
+      fechas_reactiveLNSToma() %>%
+        group_by(
+          `Semana epidemiológica`,
+        ) %>%
+        mutate(
+          Proporción = round(n / sum(n) * 100, 2)
+        ) 
+    })
     
-    ## Pangolin identificadas LNS
+    output$variantesDistribucionProporcional = renderPlotly({
+      p = ggplot(lnsStacked(), aes(x = `Semana epidemiológica`, y = Proporción, fill = Variante)) +
+        geom_col() +
+        scale_fill_manual(values = colorVariants[c(as.character(unique(lns_reactive()$Variante)))]) +
+        scale_x_date(date_labels = "%d-%m-%Y", breaks = weekly_breaks_tomaLNS()) +
+        theme(axis.text.x = element_text(angle = 90)) +
+        labs(x="Semana epidemiológica", y="Proporción") +
+        scale_y_continuous(limits = c(0,113), breaks = c(0,25,50,75,100))
+      
+      p2 = ggplotly(p, height = 500) %>%
+        layout(#legend = list(orientation = "h",  y = -0.3),
+          title = list(
+            text = paste0('Distribución Proporcional de VOC y VOI de',
+                          '<br>',
+                           'SARS-CoV-2 detectadas en Guatemala', 
+                           '<br>',
+                           'por Semana Epidemiológica',
+                           '<br>',
+                           '<sup>',
+                           '(n = ',
+                           nrow(lns_reactive()),
+                           ')',
+                           '</sup>'), y = 0.95, font = list(size=15))
+          )
+        
+    })
+    
+    output$variantesDistribucionProporcionalDB = DT::renderDataTable(
+      server = F,
+      DT::datatable(
+        lnsStacked() %>% select(-Proporción),
+        extensions = 'Buttons',
+        options = list(
+          dom = 'Bfrtip',
+          buttons = list(
+            list(
+              extend = 'csv',
+              filename = 'variantesDistribucionProporcional'
+            ),
+            list(
+              extend = 'excel',
+              filename = 'variantesDistribucionProporcional'
+            )
+          ),
+          scrollx = T
+        )
+      )
+    )
+      
+    
+    
+    ## Pangolin identificadas LNS ----
     pangolinLNS = reactive({
         lns_reactive() %>%
             group_by(pangoVoc) %>%
             tally() %>%
-            arrange(n) 
+            arrange(n) %>%
+            rename(Linaje = pangoVoc)
     })
     
     output$variantesPangolinLNS = renderPlotly({
-        p = ggplot(pangolinLNS() %>% tail(.,20), aes(x=reorder(pangoVoc,n), y=n, fill=pangoVoc)) +
+        p = ggplot(pangolinLNS() %>% tail(.,20), aes(x=reorder(Linaje,n), y=n, fill=Linaje)) +
             geom_bar(stat = "identity") +
             #geom_text(aes(label=n)) +
             theme_minimal() +
@@ -277,13 +359,13 @@ shinyServer(function(input, output, session) {
             labs(subtitle = paste('(Muestras = ', nrow(lns_reactive()),')')) +
             coord_flip()
         
-        p2 = ggplotly(p) %>%
+        p2 = ggplotly(p, tooltip = c('n', 'Linaje')) %>%
           layout(#legend = list(orientation = "h",  y = -0.3),
             title = list(text = paste0('Frecuencia de variantes del SARS-CoV-2 <br>presentes en Guatemala',
                                        ' ',
                                        '',
-                                       '(N= ',
-                                       nrow(lns_reactive()),
+                                       '(n = ',
+                                       pangolinLNS() %>% tail(.,20) %>% summarise(total = sum(n)) %>% as.integer(),
                                        ')',
                                        ''), y = 0.95))
         
@@ -313,7 +395,7 @@ shinyServer(function(input, output, session) {
     )
     
     
-    ## VOCs LNS
+    ## VOCs y VICS LNS ----
     vocLNS = reactive({
         lns_reactive() %>%
             group_by(Variante) %>%
@@ -334,13 +416,13 @@ shinyServer(function(input, output, session) {
             labs(subtitle = paste('(Muestras = ', nrow(lns_reactive()),')')) +
             coord_flip()
       
-      p2 = ggplotly(p) %>%
+      p2 = ggplotly(p, tooltip = c('n', 'Variante')) %>%
         layout(#legend = list(orientation = "h",  y = -0.3),
-          title = list(text = paste0('Las variantes de preocupación e interes de SARS-CoV-2 <br>presentes en Guatemala',
+          title = list(text = paste0('Frecuencia de variantes del SARS-CoV-2 <br>presentes en Guatemala',
                                      ' ',
                                      '',
-                                     '(N= ',
-                                     nrow(lns_reactive()),
+                                     '(n = ',
+                                     vocLNS() %>% summarise(total = sum(n)) %>% as.integer(),
                                      ')',
                                      ''), y = 0.95))
     })
@@ -367,7 +449,7 @@ shinyServer(function(input, output, session) {
         )
     )
     
-    ## Areas LNS
+    ## Areas LNS ----
     area = reactive({
         lns_reactive() %>%
             #mutate(
@@ -383,8 +465,9 @@ shinyServer(function(input, output, session) {
             arrange(nsum) 
     })
     
+    ### Frecuencias ----
     output$variantesPorDASLNS = renderPlotly({
-        ggplot(area(), aes(x=reorder(`ÁREA DE SALUD`,nsum), y=n, fill=Variante)) +
+        p = ggplot(area(), aes(x=reorder(`ÁREA DE SALUD`,-nsum), y=n, fill=Variante)) +
             geom_bar(stat = "identity") +
             #geom_text(aes(label=n)) +
             theme_minimal() +
@@ -395,12 +478,23 @@ shinyServer(function(input, output, session) {
             ggtitle('Muestras por área de salud') +
             labs(subtitle = paste('(Muestras = ', nrow(lns_reactive()),')')) +
             theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+      
+      p2 = ggplotly(p, tooltip = c('n', 'Variante')) %>%
+        layout(#legend = list(orientation = "h",  y = -0.3),
+          title = list(text = paste0('Muestras por área de salud',
+                                     ' ',
+                                     '',
+                                     '(n = ',
+                                     nrow(lns_reactive()),
+                                     ')',
+                                     ''), y = 0.95))
     })
     
     output$variantesPorDASDBLNS = DT::renderDataTable(server = F,
         DT::datatable(
             area() %>%
-                arrange(-nsum) ,
+                arrange(-nsum) %>%
+                select(-nsum),
             extensions = 'Buttons',
             options = list(
                 dom = 'Bfrtip',
@@ -419,7 +513,7 @@ shinyServer(function(input, output, session) {
         )
     )
     
-    ## Mapa variantes LNS
+    ### Mapa variantes LNS ----
     area_mapa = reactive({
         area() %>%
             filter(
@@ -493,7 +587,7 @@ shinyServer(function(input, output, session) {
         )
     })
     
-    ## Departamentos LNS
+    ## Departamentos LNS ----
     departamento = reactive({
         lns_reactive() %>%
             #mutate(
@@ -509,8 +603,9 @@ shinyServer(function(input, output, session) {
             arrange(nsum) 
     })
     
+    ### Frecuencias ----
     output$variantesPorDepartamentoLNS = renderPlotly({
-        ggplot(departamento(), aes(x=reorder(departamento,nsum), y=n, fill=Variante)) +
+      p = ggplot(departamento(), aes(x=reorder(departamento,-nsum), y=n, fill=Variante)) +
             geom_bar(stat = "identity") +
             #geom_text(aes(label=n)) +
             theme_minimal() +
@@ -521,11 +616,21 @@ shinyServer(function(input, output, session) {
             ggtitle('Muestras por departamento') +
             labs(subtitle = paste('(Muestras = ', nrow(lns_reactive()),')')) +
             theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+      
+      p2 = ggplotly(p, tooltip = c('n', 'Variante')) %>%
+        layout(#legend = list(orientation = "h",  y = -0.3),
+          title = list(text = paste0('Muestras por departamento',
+                                     ' ',
+                                     '',
+                                     '(n = ',
+                                     nrow(lns_reactive()),
+                                     ')',
+                                     ''), y = 0.95))
     })
     
 
     
-    ## Mapa variantes departamento LNS
+    ### Mapa variantes departamento LNS ----
     departamento_mapa = reactive({
         departamento() %>%
             filter(
@@ -604,7 +709,8 @@ shinyServer(function(input, output, session) {
     output$variantesPorDepartamentoDBLNS = DT::renderDataTable(server = F, 
         DT::datatable(
             departamento() %>%
-                arrange(-nsum) ,
+                arrange(-nsum)  %>%
+                select(-nsum) ,
             extensions = 'Buttons',
             options = list(
                 dom = 'Bfrtip',
@@ -625,7 +731,7 @@ shinyServer(function(input, output, session) {
     
 
     
-    ## Grupo etario LNS
+    ## Grupo etario LNS ----
     edadLNS = reactive({
         lns_reactive() %>%
             mutate(
@@ -656,8 +762,8 @@ shinyServer(function(input, output, session) {
             labs(y = "Cantidad de muestras",              # note x and y labs are switched
                  x = "Grupo etario",                          
                  fill = "Variante", 
-                 title = "Distribucion de variantes por grupo etario en Guatemala",
-                 subtitle = paste('(Muestras = ', nrow(lns_reactive()),')')
+                 title = "Distribución de variantes detectadas en Guatemala por sexo y Grupo etario",
+                 subtitle = paste('(n = ', nrow(lns_reactive()),')')
             ) +
             theme(
                 legend.position = "bottom",                          # legend to bottom
