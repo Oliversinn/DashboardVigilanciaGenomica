@@ -1,0 +1,13 @@
+name: DashboardVigilanciaGenomica
+title: DashboardVigilanciaGenomica
+username:
+account: gtmvigilanciacovid
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6612810
+bundleId: 6082589
+url: https://gtmvigilanciacovid.shinyapps.io/DashboardVigilanciaGenomica/
+when: 1657307945.30454
+lastSyncTime: 1657307945.30456
+asMultiple: FALSE
+asStatic: FALSE

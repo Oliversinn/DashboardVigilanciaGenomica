@@ -71,13 +71,13 @@ shinyServer(function(input, output, session) {
     
     dmses = reactive({
       lns_reactive() %>%
-            select(`DISTRITO/HOSPITAL`) %>%
+            select(`UNIDAD NOTIFICADORA`) %>%
             unique() %>%
-            arrange(`DISTRITO/HOSPITAL`)
+            arrange(`UNIDAD NOTIFICADORA`)
     })
     
     dmsList = reactive({
-        append(c("TODOS"),dmses()$`DISTRITO/HOSPITAL`)
+        append(c("TODOS"),dmses()$`UNIDAD NOTIFICADORA`)
     })
     
     observe({

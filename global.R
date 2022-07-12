@@ -123,6 +123,9 @@ lns2022 = lns2022 %>%
     `ID COVID`,
     `ÁREA DE SALUD`,
     `DISTRITO/HOSPITAL`,
+    ##
+    `UNIDAD NOTIFICADORA`,
+    ##
     SEXO,
     AÑOS,
     `FECHA DE TOMA DE MUESTRA`,
