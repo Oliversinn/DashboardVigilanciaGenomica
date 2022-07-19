@@ -331,14 +331,14 @@ shinyUI(dashboardPage(skin = 'purple',
                                       tags$li(tags$b('Fechas:'), 'permite visualizar los datos por diferentes períodos temporales.'),
                                       tags$li(tags$b('Dirección de Área de Salud (DAS):'), 'permite seleccionar una o muchas 
                                               Direcciones de Área de Salud que envían muestras para secuenciación de SARS-CoV-2.'),
-                                      tags$li(tags$b('Distrito Municipal de Salud (DMS):'), 'permite seleccionar uno o muchos
-                                               Distritos Municipales de Salud que envían muestras para secuenciación de SARS-CoV-2.'),
+                                      tags$li(tags$b('Unidad notificadora:'), 'permite seleccionar una o muchas
+                                               Unidades notificadoras que envían muestras para secuenciación de SARS-CoV-2.'),
                                       tags$li(tags$b('Variante detectada:'), 'este filtro nos permite visualizar los datos de una o más
                                               variantes del SARS-CoV-2 identificadas en el país.'),
                                     ),
-                                    tags$p(tags$b('IMPORTANTE:'), 'para aplicar múltiples filtros DAS, DMS o Variantes debe seguir los siguientes pasos:'),
+                                    tags$p(tags$b('IMPORTANTE:'), 'para aplicar múltiples filtros DAS, Unidad notificadora o Variantes debe seguir los siguientes pasos:'),
                                     tags$ol(
-                                      tags$li('Seleccionar una opción de las DAS, DMS o Variante que desea visualizar'),
+                                      tags$li('Seleccionar una opción de las DAS, Unidad notificadora o Variante que desea visualizar'),
                                       tags$li('Esperar a que el tablero se actualice'),
                                       tags$li('Si se desea agregar otra opción', 
                                               tags$ul( 
