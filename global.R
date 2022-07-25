@@ -185,7 +185,9 @@ lns = lns %>%
                              `ÁREA DE SALUD` %like% 'PETEN' ~ 'PETEN',
                              `ÁREA DE SALUD` == 'IXCAN' ~ 'QUICHE',
                              `ÁREA DE SALUD` == 'IXIL' ~ 'QUICHE',
-                             T ~ `ÁREA DE SALUD`)
+                             T ~ `ÁREA DE SALUD`),
+    `FECHA DE TOMA DE MUESTRA` = case_when(is.na(`FECHA DE TOMA DE MUESTRA`) ~ `FECHA INGRESO DE MUESTRA`,
+                                           T ~ `FECHA DE TOMA DE MUESTRA`)
   )
 
 lns = dplyr::left_join(lns, variants)  %>%
