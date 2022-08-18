@@ -120,7 +120,7 @@ lns2022 = lns2022 %>%
   ) %>%
   select(
     `FECHA DE NACIMIENTO`,
-    `ID COVID`,
+    `ID COVID` = `ID SEQ`,
     `ÁREA DE SALUD`,
     `DISTRITO/HOSPITAL`,
     ##
@@ -143,7 +143,9 @@ lns2022 = lns2022 %>%
     #`FECHA INGRESO DE MUESTRA` = as.Date(as.numeric(`FECHA INGRESO DE MUESTRA`), origin = "1899-12-30")
     `FECHA INGRESO DE MUESTRA` = case_when(
       stri_detect_fixed(`FECHA INGRESO DE MUESTRA`, '-') ~ as.Date(`FECHA INGRESO DE MUESTRA`),
-      T ~ as.Date(`FECHA INGRESO DE MUESTRA`, format = "%d/%m/%Y"))
+      T ~ as.Date(`FECHA INGRESO DE MUESTRA`, format = "%d/%m/%Y")),
+    `ÁREA DE SALUD` = case_when(`ÁREA DE SALUD` %like% "QUICHE" ~ "QUICHE",
+                                T ~ `ÁREA DE SALUD`)
   )
 
 ### Union de base de datos ----
