@@ -111,7 +111,7 @@ lns20y21 = lns20y21 %>%
   )
 
 ### 2022 ----
-lns2022 = read.xlsx('data/BASE SEQ 2022.xlsx', sheet = 2, sep.names = ' ') %>% dplyr::filter( !is.na(`RESULTADO FINAL`))
+lns2022 = read.xlsx('data/BASE SEQ 2022.xlsx', sheet = 2, sep.names = ' ', detectDates = TRUE) %>% dplyr::filter( !is.na(`RESULTADO FINAL`))
 lns2022 = lns2022 %>%
   filter(
     !is.na(`RESULTADO FINAL`),
@@ -136,8 +136,14 @@ lns2022 = lns2022 %>%
   ) %>%
   mutate(
     AÑOS = as.numeric(AÑOS),
-    `FECHA DE TOMA DE MUESTRA` = as.Date(as.numeric(`FECHA DE TOMA DE MUESTRA`), origin = "1899-12-30"),
-    `FECHA INGRESO DE MUESTRA` = as.Date(as.numeric(`FECHA INGRESO DE MUESTRA`), origin = "1899-12-30")
+    #`FECHA DE TOMA DE MUESTRA` = as.Date(as.numeric(`FECHA DE TOMA DE MUESTRA`), origin = "1899-12-30"),
+    `FECHA DE TOMA DE MUESTRA` = case_when(
+      stri_detect_fixed(`FECHA DE TOMA DE MUESTRA`, '-') ~ as.Date(`FECHA DE TOMA DE MUESTRA`),
+      T ~ as.Date(`FECHA DE TOMA DE MUESTRA`, format = "%d/%m/%Y")),
+    #`FECHA INGRESO DE MUESTRA` = as.Date(as.numeric(`FECHA INGRESO DE MUESTRA`), origin = "1899-12-30")
+    `FECHA INGRESO DE MUESTRA` = case_when(
+      stri_detect_fixed(`FECHA INGRESO DE MUESTRA`, '-') ~ as.Date(`FECHA INGRESO DE MUESTRA`),
+      T ~ as.Date(`FECHA INGRESO DE MUESTRA`, format = "%d/%m/%Y"))
   )
 
 ### Union de base de datos ----
